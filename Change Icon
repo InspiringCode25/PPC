@@ -1,0 +1,6 @@
+$shell = New-Object -ComObject WScript.Shell
+$Location = "C:\Users\public\Desktop"
+$shortcut = $shell.CreateShortcut("$Location\Log Out.lnk")
+$shortcut.TargetPath = 'C:\Users\Public\Documents\Shortcut'
+$shortcut.IconLocation = "shell32.dll,27"
+$shortcut.Save()
