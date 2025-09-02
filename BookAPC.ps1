@@ -1,4 +1,8 @@
-# Define the URL and the shortcut path
+#THIS SCRIPT SETS DESKTOP SHORTCUTS FOR BOOK A PC, WORD, EXCEL, POWERPOINT AND SETS THE CUSTOM VNC BLACKSCREEN
+
+#BOOK A PC
+
+# Define the URL and the shortcut path for "Book a PC"
 $url = "https://nottslibraries.getnetloan.co.uk/netloan"
 $shortcutPath = "C:\Users\Public\Desktop\Book A PC.lnk"
 
@@ -11,7 +15,9 @@ $shortcut.TargetPath = $url
 $shortcut.IconLocation = "shell32.dll,15"
 $shortcut.Save()
 
-# Define the file path and the shortcut path
+#WORD
+
+# Define the file path and the shortcut path for "Microsoft Word"
 $url = "C:\Program Files\Microsoft Office\root\Office16\WINWORD.EXE"
 $shortcutPath = "C:\Users\Public\Desktop\Microsoft Word.lnk"
 
@@ -24,7 +30,9 @@ $shortcut.TargetPath = $url
 $shortcut.IconLocation = "%ProgramFiles%\Microsoft Office\Root\VFS\Windows\Installer\{90160000-000F-0000-1000-0000000FF1CE}\wordicon.exe"
 $shortcut.Save()
 
-# Define the file path and the shortcut path
+#EXCEL
+
+# Define the file path and the shortcut path for "Microsoft Excel"
 $url = "C:\Program Files\Microsoft Office\root\Office16\EXCEL.EXE"
 $shortcutPath = "C:\Users\Public\Desktop\Microsoft Excel.lnk"
 
@@ -37,7 +45,9 @@ $shortcut.TargetPath = $url
 $shortcut.IconLocation = "%ProgramFiles%\Microsoft Office\Root\VFS\Windows\Installer\{90160000-000F-0000-1000-0000000FF1CE}\xlicons.exe"
 $shortcut.Save()
 
-# Define the file path and the shortcut path
+#POWERPOINT
+
+# Define the file path and the shortcut path for "Microsoft Powerpoint"
 $url = "C:\Program Files\Microsoft Office\root\Office16\POWERPNT.EXE"
 $shortcutPath = "C:\Users\Public\Desktop\Microsoft Powerpoint.lnk"
 
@@ -50,5 +60,7 @@ $shortcut.TargetPath = $url
 $shortcut.IconLocation = "%ProgramFiles%\Microsoft Office\Root\VFS\Windows\Installer\{90160000-000F-0000-1000-0000000FF1CE}\pptico.exe"
 $shortcut.Save()
 
+#SET CUSTOM VNC BLACKOUT SCREEN
+
 New-Item -Path 'C:\Program Files\uvnc bvba\UltraVNC' -ItemType Directory 
-Invoke-WebRequest 'https://raw.githubusercontent.com/tillyjoanna/PPC/refs/heads/main/background.bmp' -OutFile 'C:\Program Files\uvnc bvba\UltraVNC\Background.bmp'
+Invoke-WebRequest 'https://raw.githubusercontent.com/InspiringCode25/PPC/refs/heads/main/background.bmp' -OutFile 'C:\Program Files\uvnc bvba\UltraVNC\Background.bmp'
