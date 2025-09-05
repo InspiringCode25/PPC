@@ -1,0 +1,13 @@
+$shortcutPath = "$env:APPDATA\Microsoft\Windows\Start Menu\Programs\Log Out.lnk"
+$shell = New-Object -ComObject WScript.Shell
+$shortcut = $shell.CreateShortcut($shortcutPath)
+$shortcut.TargetPath = "C:\Program Files\netloan\Client\NLClientTS.exe -logout"
+$shortcut.IconLocation = "C:\Path\To\MyIcon.ico"
+$shortcut.Save()
+
+$shortcutPath = "$env:APPDATA\Microsoft\Windows\Start Menu\Programs\Lock.lnk"
+$shell = New-Object -ComObject WScript.Shell
+$shortcut = $shell.CreateShortcut($shortcutPath)
+$shortcut.TargetPath = "C:\Program Files\netloan\Client\NLClientTS.exe -lock"
+$shortcut.IconLocation = "shell32.dll,27"
+$shortcut.Save()
