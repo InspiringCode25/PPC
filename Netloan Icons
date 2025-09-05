@@ -1,0 +1,67 @@
+# Define the name of the shortcut to remove
+$shortcutName = "Lock Screen.lnk"
+
+# Define the path to the Public Desktop
+$publicDesktopPath = "$env:PUBLIC\Desktop"
+
+# Combine the full path to the shortcut
+$shortcutPath = Join-Path -Path $publicDesktopPath -ChildPath $shortcutName
+
+# Check if the shortcut exists
+if (Test-Path $shortcutPath) {
+    try {
+        Remove-Item $shortcutPath -Force
+        Write-Host "Shortcut '$shortcutName' has been removed from the Public Desktop."
+    } catch {
+        Write-Host "Failed to remove shortcut: $_"
+    }
+} else {
+    Write-Host "Shortcut '$shortcutName' not found on the Public Desktop."
+}
+
+# Define the name of the shortcut to remove
+$shortcutName = "Log Out.lnk"
+
+# Define the path to the Public Desktop
+$publicDesktopPath = "$env:PUBLIC\Desktop"
+
+# Combine the full path to the shortcut
+$shortcutPath = Join-Path -Path $publicDesktopPath -ChildPath $shortcutName
+
+# Check if the shortcut exists
+if (Test-Path $shortcutPath) {
+    try {
+        Remove-Item $shortcutPath -Force
+        Write-Host "Shortcut '$shortcutName' has been removed from the Public Desktop."
+    } catch {
+        Write-Host "Failed to remove shortcut: $_"
+    }
+} else {
+    Write-Host "Shortcut '$shortcutName' not found on the Public Desktop."
+}
+
+# Define the file path and the shortcut path
+$url = "C:\Program Files\netloan\Client\NLClientTS.exe -lock"
+$shortcutPath = "C:\Users\Public\Desktop\Lock Screen.lnk"
+
+# Create a COM object for WScript.Shell
+$wshShell = New-Object -ComObject WScript.Shell
+
+# Create the shortcut
+$shortcut = $wshShell.CreateShortcut($shortcutPath)
+$shortcut.TargetPath = $url
+$shortcut.IconLocation = "shell32.dll,47"
+$shortcut.Save()
+
+# Define the file path and the shortcut path
+$url = "C:\Program Files\netloan\Client\NLClientTS.exe -logout"
+$shortcutPath = "C:\Users\Public\Desktop\Log Out.lnk"
+
+# Create a COM object for WScript.Shell
+$wshShell = New-Object -ComObject WScript.Shell
+
+# Create the shortcut
+$shortcut = $wshShell.CreateShortcut($shortcutPath)
+$shortcut.TargetPath = $url
+$shortcut.IconLocation = "shell32.dll,27"
+$shortcut.Save()
