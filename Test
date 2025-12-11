@@ -1,0 +1,27 @@
+$PatternSID = 'S-1-5-21-\d+-\d+\-\d+\-\d+$'
+
+$ProfileList = gp 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\ProfileList\*' | Where-Object {$_.PSChildName -match $PatternSID} | 
+    Select  @{name="SID";expression={$_.PSChildName}}, 
+            @{name="UserHive";expression={"$($_.ProfileImagePath)\ntuser.dat"}}, 
+            @{name="Username";expression={$_.ProfileImagePath -replace '^(.*[\\\/])', ''}}
+ 
+$LoadedHives = gci Registry::HKEY_USERS | ? {$_.PSChildname -match $PatternSID} | Select @{name="SID";expression={$_.PSChildName}}
+ 
+$UnloadedHives = Compare-Object $ProfileList.SID $LoadedHives.SID | Select @{name="SID";expression={$_.InputObject}}, UserHive, Username
+ 
+Foreach ($item in $ProfileList) {
+    IF ($item.SID -in $UnloadedHives.SID) {
+        reg load HKU\$($Item.SID) $($Item.UserHive) | Out-Null
+    }
+
+ 
+Set-ItemProperty -Path "HKCU:\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" -Name "Hidden" -Value "2"
+Stop-Process -Name explorer -Force
+Start-Process explorer.exe
+   
+    IF ($item.SID -in $UnloadedHives.SID) {
+        ### Garbage collection and closing of ntuser.dat ###
+        [gc]::Collect()
+        reg unload HKU\$($Item.SID) | Out-Null
+    }
+}
