@@ -15,7 +15,7 @@ Foreach ($item in $ProfileList) {
     }
 
     "{0}" -f $($item.Username) | Write-Output
-    Set-ItemProperty -Path "HKEY_USERS\$($Item.SID)\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" -Name "Hidden" -Value "2"
+    Set-ItemProperty Registry::HKEY_USERS\$($Item.SID)\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced -Name "Hidden" -Value "2"
 
    
     IF ($item.SID -in $UnloadedHives.SID) {
