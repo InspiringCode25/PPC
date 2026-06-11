@@ -1,0 +1,1 @@
+Start-ScheduledTask -TaskName "\Microsoft\Windows\PI\Secure-Boot-Update"
