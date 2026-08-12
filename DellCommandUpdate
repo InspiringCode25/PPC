@@ -1,0 +1,99 @@
+# ==============================================================================
+# CONFIGURATION
+# ==============================================================================
+$DF_Password  = "Fr@nk123"
+$AE_Password  = "Fr@nk123" # Usually the same, but change if different
+
+$DFC_Path     = "C:\Program Files (x86)\Faronics\Deep Freeze\Enterprise\DFC.exe"
+$AEC_Path     = "C:\Program Files (x86)\Faronics\Anti-Executable\AEC.exe" # Update path if different
+
+$NetUrl       = "https://builds.dotnet.microsoft.com/dotnet/aspnetcore/Runtime/10.0.11/aspnetcore-runtime-10.0.11-win-x64.exe" 
+$DcuUrl       = "https://dl.dell.com/FOLDER14847331M/2/Dell-Command-Update-Windows-Universal-Application_P0P70_WIN64_5.7.1_A00.EXE" 
+
+# Temp directory for installers
+$WorkDir = "C:\Temp\Deployments"
+If (!(Test-Path $WorkDir)) { New-Item -ItemType Directory -Path $WorkDir | Out-Null }
+
+# ==============================================================================
+# PHASE 1: DEEP FREEZE & ANTI-EXECUTABLE HANDLING (Frozen State)
+# ==============================================================================
+$FlagFile = "$WorkDir\df_install_stage.txt"
+
+if (!(Test-Path $FlagFile)) {
+    # 1. Disable Anti-Executable first (Put into Maintenance mode or Disable)
+    if (Test-Path $AEC_Path) {
+        Write-Host "Disabling Anti-Executable enforcement..."
+        # Uses AEC command line to temporarily stop file blocking
+        Start-Process $AEC_Path -ArgumentList "$AE_Password /DISABLE" -Wait -NoNewWindow
+    }
+
+    # 2. Thaw Deep Freeze
+    if (Test-Path $DFC_Path) {
+        Write-Host "System is locked. Issuing Deep Freeze Thaw command..."
+        Start-Process $DFC_Path -ArgumentList "$DF_Password /THAWNEXTBOOT" -Wait -NoNewWindow
+        
+        # Create persistent flag to resume script after reboot
+        New-Item -Path $FlagFile -ItemType File -Value "Thawed" | Out-Null
+        
+        Write-Host "Rebooting system to apply changes..."
+        Restart-Computer -Force
+        Exit
+    }
+}
+
+# ==============================================================================
+# PHASE 2: DOWNLOAD & INSTALLATION (Runs when system boots up Thawed/Unprotected)
+# ==============================================================================
+Write-Host "System is Thawed and Anti-Executable is bypassed. Proceeding..."
+
+# Double check Anti-Executable is disabled for this boot instance just in case
+if (Test-Path $AEC_Path) {
+    Start-Process $AEC_Path -ArgumentList "$AE_Password /DISABLE" -Wait -NoNewWindow
+}
+
+# 1. Download Files
+Write-Host "Downloading components..."
+Invoke-WebRequest -Uri $NetUrl -OutFile "$WorkDir\dotnet10.exe"
+Invoke-WebRequest -Uri $DcuUrl -OutFile "$WorkDir\dcu_installer.exe"
+
+# 2. Install .NET 10 Desktop Runtime Silently
+Write-Host "Installing .NET 10 Runtime..."
+$NetProcess = Start-Process -FilePath "$WorkDir\dotnet10.exe" -ArgumentList "/install /quiet /norestart" -Wait -PassThru
+if ($NetProcess.ExitCode -ne 0 -and $NetProcess.ExitCode -ne 3010) {
+    Write-Error ".NET 10 Installation failed with exit code $($NetProcess.ExitCode)"
+    Exit
+}
+
+# 3. Install Dell Command Update Silently
+Write-Host "Installing Dell Command Update..."
+$DcuProcess = Start-Process -FilePath "$WorkDir\dcu_installer.exe" -ArgumentList "/s /l=$WorkDir\dcu_log.txt" -Wait -PassThru
+if ($DcuProcess.ExitCode -ne 0 -and $DcuProcess.ExitCode -ne 3010) {
+    Write-Error "Dell Command Update failed with exit code $($DcuProcess.ExitCode)"
+    Exit
+}
+
+# ==============================================================================
+# PHASE 3: RE-PROTECT THE PC (Freeze & Enable AE)
+# ==============================================================================
+
+# 1. Re-enable Anti-Executable 
+if (Test-Path $AEC_Path) {
+    Write-Host "Re-enabling Anti-Executable..."
+    Start-Process $AEC_Path -ArgumentList "$AE_Password /ENABLE" -Wait -NoNewWindow
+}
+
+# 2. Re-Freeze Deep Freeze
+if (Test-Path $DFC_Path) {
+    Write-Host "Re-freezing the machine..."
+    Start-Process $DFC_Path -ArgumentList "$DF_Password /FREEZENEXTBOOT" -Wait -NoNewWindow
+    
+    # Clean up installers so they don't consume space on the frozen drive
+    Remove-Item -Path "$WorkDir\dotnet10.exe" -Force -ErrorAction SilentlyContinue
+    Remove-Item -Path "$WorkDir\dcu_installer.exe" -Force -ErrorAction SilentlyContinue
+    Remove-Item -Path $FlagFile -Force -ErrorAction SilentlyContinue
+    
+    Write-Host "Rebooting to lock the system back down..."
+    Restart-Computer -Force
+} else {
+    Write-Host "Installation finished."
+}
